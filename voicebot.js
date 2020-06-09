@@ -4,9 +4,10 @@ const client = new Discord.Client();
 const config = require('./config.json');
 
 const RequestChannelId = config.requestChannelId; //보이스 채널 신청 채널
-const ParentChannelId  = config.parentChannelId; //보이스 채널 생성 위치
-const GameRunningRole  = config.gameRunningRole; //게임 실행시 부여될 등급
-const GameTitleName    = config.gameTitleName;       //게임 이름
+const ParentChannelId  = config.parentChannelId;  //보이스 채널 생성 위치
+const LogChannelId     = config.logChannelId;     //유저 JOIN, LEAVE 기록할 채널
+const GameRunningRole  = config.gameRunningRole;  //게임 실행시 부여될 등급
+const GameTitleName    = config.gameTitleName;    //게임 이름
 
 const UserChannels = [];
 const GameUserList = [];
@@ -14,13 +15,13 @@ const GameUserList = [];
 client.on('ready', () => {
 });
 
-client.on("voiceStateUpdate", function(oldMember, newMember){
+client.on("voiceStateUpdate", (oldMember, newMember) => {
     let userChannelIndex = UserChannels.findIndex(id => id === oldMember.channelID);
 
     if (newMember.channelID === RequestChannelId) {
         newMember.guild.channels.create(newMember.member.user.tag, {
             type: "voice",
-            bitrate: "96000",
+            bitrate: config.bitrate,
             parent: newMember.guild.channels.cache.find(channel => channel.id === ParentChannelId)
         }).then(r => {
             r.createOverwrite(newMember.member, {
@@ -41,7 +42,7 @@ client.on("voiceStateUpdate", function(oldMember, newMember){
     }
 });
 
-client.on("presenceUpdate", function(oldUser, newUser){
+client.on("presenceUpdate", (oldUser, newUser) => {
     let gamingUser = GameUserList.findIndex(id => id === newUser.user.id);
 
     if (gamingUser === -1) {
@@ -57,6 +58,16 @@ client.on("presenceUpdate", function(oldUser, newUser){
             });
         }
     }
+});
+
+client.on('guildMemberAdd', member => {
+    console.log("입장");
+    client.channels.cache.get(LogChannelId).send(`${member.user.tag} 님이 입장`);
+});
+
+client.on("guildMemberRemove", member => {
+    console.log("퇴장");
+    client.channels.cache.get(LogChannelId).send(`${member.user.tag} 님이 퇴장`);
 });
 
 
