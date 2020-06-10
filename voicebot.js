@@ -31,13 +31,13 @@ client.on("voiceStateUpdate", (oldMember, newMember) => {
             newMember.member.voice.setChannel(r.id);
             UserChannels.push(r.id);
         });
-    } else {
-        if (userChannelIndex !== -1) {
-            if (oldMember.channel.members.size <= 0) {
-                oldMember.channel.delete("user empty").then(channel => {
-                    UserChannels.slice(userChannelIndex, 1);
-                });
-            }
+    }
+
+    if (userChannelIndex !== -1) {
+        if (oldMember.channel.members.size <= 0) {
+            oldMember.channel.delete("user empty").then(channel => {
+                UserChannels.slice(userChannelIndex, 1);
+            });
         }
     }
 });
